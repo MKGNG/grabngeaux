@@ -163,17 +163,30 @@
   .swiper-image-inner.swiper-image-right{
     justify-content:center;align-items:flex-start;
     padding:clamp(28px,3.6vw,60px);
-    background-color:hsla(0,0%,0%,.5);
+    /* was .5 — halved every pixel, which buried the brighter meat-plates photo.
+       .3 lets the food show through; the text stays readable because the
+       ::after gradient below is now concentrated on the left where the text is,
+       instead of an even veil across the whole panel. */
+    background-color:hsla(0,0%,0%,.3);
     background-blend-mode:multiply;
     position:relative;
   }
   .swiper-image-inner.swiper-image-right::after{
     content:"";position:absolute;inset:0;pointer-events:none;
-    background:linear-gradient(200deg,rgba(110,50,138,.34),rgba(35,31,32,.44));
+    /* Left-to-right: dark where the text sits, clearing toward the right so the
+       food is visible. A touch of brand purple kept in the dark end. */
+    background:linear-gradient(90deg,
+      rgba(35,31,32,.62) 0%,
+      rgba(35,31,32,.42) 42%,
+      rgba(110,50,138,.10) 78%,
+      rgba(110,50,138,0) 100%);
   }
   .swiper-image-inner.swiper-image-right > *{position:relative;z-index:1}
 
   /* ---- type ---- */
+  .swiper-image-right h1,.swiper-image-right p,.swiper-image-right .m-eyebrow{
+    text-shadow:0 2px 12px rgba(0,0,0,.55);   /* carries the text over the lighter right side */
+  }
   #menuSlider h1{
     font-family:'Archivo',sans-serif;font-weight:900;
     color:#fff;margin:0;line-height:.98;letter-spacing:-.035em;
@@ -1553,7 +1566,11 @@
     .hero-inner{grid-template-columns:1fr;gap:20px}
     .hero-badge{order:-1;margin-bottom:6px}
     .hero-badge img{width:min(300px,66%)}
-    .hero-showcase{order:-1;margin-bottom:20px;margin-top:0}
+    /* order:-1 used to hoist the bento (video + Food Menu / Geaux Plus tiles)
+       ABOVE the logo on mobile. Dropped — source order is hero-copy (logo +
+       video) then hero-showcase, which is the order wanted: brand first, then
+       the tiles. margin-top:0 stays so the tiles sit tight under the copy. */
+    .hero-showcase{margin-bottom:20px;margin-top:12px}
     .hero-showcase .bento-grid{grid-template-columns:1fr;grid-auto-rows:auto}
     .hero-showcase .btile.big,.hero-showcase .t-rewardpic,.hero-showcase .t-photo{grid-column:span 1;min-height:0}
     .showcase-badge{width:74px;height:74px;bottom:-16px}
@@ -1567,8 +1584,28 @@
   @media(max-width:760px){
     .nav-links{display:none}   /* .nav-cta .btn was the Join button — gone now */
     .burger{display:block}
-    .nav-links.open{display:flex;position:absolute;top:100%;left:0;right:0;flex-direction:column;background:rgba(255,255,255,.97);backdrop-filter:blur(18px);padding:16px;gap:4px;border-bottom:1px solid var(--line)}
-    .nav-links.open a{font-size:17px;padding:12px 15px}
+    /* The desktop nav paints its green band on a ::before with the drip feather.
+       On mobile that ::before was still there under the open menu, so the panel
+       came out green with white outlined text meant for the band. Kill it, give
+       the dropdown a clean white surface, and reset the links to plain dark text. */
+    .nav-links.open{display:flex;position:absolute;top:100%;left:0;right:0;
+      flex-direction:column;align-items:stretch;
+      background:#fff;backdrop-filter:blur(18px);
+      padding:8px;gap:2px;border-top:3px solid var(--gator);
+      border-bottom:1px solid var(--line);box-shadow:0 24px 40px -20px rgba(0,0,0,.35)}
+    .nav-links.open::before{display:none}   /* the green band + drip, gone on mobile */
+    .nav-links.open a{
+      font-family:'Archivo',sans-serif;          /* not Smokum — reads cleaner in a list */
+      font-weight:600;font-size:16px;letter-spacing:0;
+      color:var(--cream);text-shadow:none;
+      padding:14px 16px;border-radius:10px;text-align:left;
+      border-bottom:1px solid var(--line);
+    }
+    .nav-links.open a:last-child{border-bottom:0}
+    .nav-links.open a:hover{background:var(--ink-2);color:var(--cream)}
+    /* active row: gator tint + a solid gator bar, no outline stack */
+    .nav-links.open a.active{color:var(--gator-lite);background:rgba(59,152,68,.08)}
+    .nav-links.open a.active::after{display:none}   /* the animated underline is desktop-only */
     .block{padding:76px 0}
     :root{--pad:20px}
     .dep-list{grid-template-columns:1fr;gap:0}
@@ -1643,27 +1680,32 @@
   /* the member banner is a 3.5:1 strip in a 1.9:1 tile — sit it whole on its own yellow */
 
   .btile.t-rewardpic{background:#ffda3a}
-  .btile.t-rewardpic .bg img{object-fit:contain!important}
-  /* The keyframes are gone. They gave the video a fixed 5.5s slot out of a 22s
-     loop, so a longer clip got cut off mid-frame — and CSS can't know an mp4's
-     duration, it's only available at runtime after loadedmetadata.
-     ggSwap() drives this now: images advance on a timer, the video advances on
-     its own `ended` event. Any clip length, nothing to keep in sync. */
-  .gg-swap img,.gg-swap video{
-    position:absolute;inset:0;width:100%;height:100%;
-    opacity:0;transition:opacity .6s var(--ease);
-  }
-  .gg-swap .gg-a{object-fit:cover}
-  .gg-swap .gg-b{object-fit:cover}
-  .btile.t-geaux .bg img.gg-c{object-fit:contain;background:#FEC800}
-  .gg-swap .gg-v{object-fit:cover;pointer-events:none}
-  .gg-swap .on{opacity:1;z-index:2}
-  /* No JS? First slide shows and stays. Better than a blank tile. */
-  .gg-swap .gg-c{opacity:1}
-  .gg-swap .gg-c.off{opacity:0}
-  @media(prefers-reduced-motion:reduce){
-    .gg-swap img,.gg-swap video{transition:none}
-  }
+  .btile.t-rewardpic .bg img.rv-badge{object-fit:contain!important}
+  /* LEFT tile — the rewards badge AND the video, crossfading. t-rewardpic keeps
+     its original size (grid-column:span 2) and #ffda3a yellow; both layers sit
+     in the same box. The badge is contain (artwork on the yellow), the video is
+     cover. .rv-swap toggles which is visible; JS flips it on a timer + the
+     clip's own end. */
+  .rv-swap{position:absolute;inset:0}
+  .rv-swap .rv-badge{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;
+    opacity:1;transition:opacity .7s var(--ease);z-index:1}
+  .rv-swap .rv-vid{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
+    opacity:0;transition:opacity .7s var(--ease);z-index:2;display:block}
+  .rv-swap.show-vid .rv-badge{opacity:0}
+  .rv-swap.show-vid .rv-vid{opacity:1}
+  @media(prefers-reduced-motion:reduce){ .rv-swap .rv-badge,.rv-swap .rv-vid{transition:none} }
+
+  /* RIGHT tile — a crossfading promo slideshow (psSlideshow() drives it).
+     All slides stacked; the .on one is visible. object-fit:contain keeps each
+     promo whole (they're 1.90:1 artwork with text to the edges — cover would
+     crop the price). #fff behind, since the artwork is on white. */
+  .t-promo .bg{position:absolute;inset:0;background:#fff}
+  .ps-slide{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;
+    opacity:0;transition:opacity .8s var(--ease)}
+  .ps-slide.on{opacity:1}
+  .ps-slide:first-child{opacity:1}          /* no-JS: first promo shows */
+  .ps-slide.on ~ .ps-slide:first-child{}     /* (harmless, keeps specificity notes tidy) */
+  @media(prefers-reduced-motion:reduce){ .ps-slide{transition:none} }
   /* Meats tile: three cuts, crossfading */
   .gg-meat img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
   .gg-meat img:nth-child(1){opacity:1}
@@ -1901,20 +1943,26 @@
     </div>
     <div class="hero-showcase">
       <div class="bento-grid reveal">
-      <a href="#/rewards" class="btile t-rewardpic">
-        <div class="bg"><img src="https://tcxctflzsvaruvfeyoim.supabase.co/storage/v1/object/public/site-images/geaux-rewards-badge.webp" alt="Geaux Rewards — Special Offers, Save Now" /></div>
+      <a href="#/rewards" class="btile t-rewardpic" aria-label="Geaux Rewards">
+        <div class="bg rv-swap">
+          <img class="rv-badge" src="https://tcxctflzsvaruvfeyoim.supabase.co/storage/v1/object/public/site-images/geaux-rewards-badge.webp" alt="Geaux Rewards — Special Offers, Save Now" />
+          <!-- NO `loop`: with it, the browser replays internally and the `ended`
+               event never fires, so the code can never crossfade back to the
+               badge. Without it, `ended` fires each pass and drives the
+               badge <-> video cycle. -->
+          <video class="rv-vid" muted playsinline preload="auto"
+             data-img="logo test 3-12-26.mp4" aria-hidden="true" tabindex="-1"></video>
+        </div>
       </a>
 
-      <a href="#/rewards" class="btile big t-geaux">
-        <div class="bg gg-swap"><video class="gg-v" muted playsinline preload="auto"
-             data-img="logo test 3-12-26.mp4" aria-hidden="true" tabindex="-1"></video><img class="gg-a" src="https://tcxctflzsvaruvfeyoim.supabase.co/storage/v1/object/public/site-images/geaux-rewards-app.webp" alt="Download the Geaux Rewards app — it's free" /><img class="gg-b" src="https://tcxctflzsvaruvfeyoim.supabase.co/storage/v1/object/public/site-images/rewards-any-size-99.webp" alt="Any size fountain drink, 99 cents" /><img class="gg-c" src="https://tcxctflzsvaruvfeyoim.supabase.co/storage/v1/object/public/site-images/rewards-become-member.webp" alt="Become a Geaux Rewards member" /></div>
-        <div class="scrim gr-scrim"></div>
-        <div class="bcontent gr-content">
-          <div class="breveal">
-            <span class="go">Join Geaux Plus &amp; save
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-            </span>
-          </div>
+      <a href="#/promotions" class="btile big t-promo" aria-label="This month's deals">
+        <div class="bg ps-strip">
+          <img class="ps-slide" src="https://tcxctflzsvaruvfeyoim.supabase.co/storage/v1/object/public/site-images/June_Geaux_Rewards_Creative_Update_new-01.webp" alt="Roxane Purified Water — $4.99 for a 24 pack" onerror="if(window.ggMissing)ggMissing('Promo slide','June_Geaux_Rewards_Creative_Update_new-01.webp')" />
+          <img class="ps-slide" src="https://tcxctflzsvaruvfeyoim.supabase.co/storage/v1/object/public/site-images/July_Gorilla_Geaux_Rewards_Creative_Update-01.webp" alt="Gorilla Energy 16oz — buy 2 for $4.00" onerror="if(window.ggMissing)ggMissing('Promo slide','July_Gorilla_Geaux_Rewards_Creative_Update-01.webp')" />
+          <img class="ps-slide" src="https://tcxctflzsvaruvfeyoim.supabase.co/storage/v1/object/public/site-images/June_Geaux_Rewards_Creative_Update_new-06.webp" alt="Grizzly Energy 16oz — buy 1 get one for $1" onerror="if(window.ggMissing)ggMissing('Promo slide','June_Geaux_Rewards_Creative_Update_new-06.webp')" />
+          <img class="ps-slide" src="https://tcxctflzsvaruvfeyoim.supabase.co/storage/v1/object/public/site-images/July_Geaux_Rewards_Creative_Update-01.webp" alt="Phorm Energy 16oz — buy 2 for $5.00" onerror="if(window.ggMissing)ggMissing('Promo slide','July_Geaux_Rewards_Creative_Update-01.webp')" />
+          <img class="ps-slide" src="https://tcxctflzsvaruvfeyoim.supabase.co/storage/v1/object/public/site-images/June_Geaux_Rewards_Creative_Update_new-04.webp" alt="Monster Energy 16oz — buy 1 get one for $1" onerror="if(window.ggMissing)ggMissing('Promo slide','June_Geaux_Rewards_Creative_Update_new-04.webp')" />
+          <img class="ps-slide" src="https://tcxctflzsvaruvfeyoim.supabase.co/storage/v1/object/public/site-images/June_Geaux_Rewards_Creative_Update-03.webp" alt="Powerade 28oz — buy 1 get one for $1" onerror="if(window.ggMissing)ggMissing('Promo slide','June_Geaux_Rewards_Creative_Update-03.webp')" />
         </div>
       </a>
 
@@ -1938,7 +1986,7 @@
       </a>
 
       <a href="#/menu" class="btile t-photo">
-        <div class="bg"><img src="https://tcxctflzsvaruvfeyoim.supabase.co/storage/v1/object/public/site-images/tile-food-menu.jpg" alt="House-smoked food from the Grab -N- Geaux kitchen" /></div>
+        <div class="bg"><img src="https://tcxctflzsvaruvfeyoim.supabase.co/storage/v1/object/public/site-images/4__Mexican_Brisket_Taco.jpg" alt="House-smoked food from the Grab -N- Geaux kitchen"  onerror="if(window.ggMissing)ggMissing('Food Menu tile','4__Mexican_Brisket_Taco.jpg')" /></div>
         <div class="scrim"></div>
         <div class="bcontent">
           <h3>Food Menu</h3>
@@ -2488,8 +2536,18 @@
     if(!FLAT.length){ document.getElementById('menuSlider').innerHTML='<p class="mempty">Menu items coming soon.</p>'; return; }
 
     /* right half needs a different shot from the left */
+    /* The right-panel background per department. Auto-picked from the first
+       cover-fit item in each dept — EXCEPT where AMBIENT_OVERRIDE names one.
+       Deli's auto pick was the quesadilla; the override points it at the
+       meat-plates photo from What's Cooking instead. Add a line here to set any
+       other department's background by hand. */
+    const AMBIENT_OVERRIDE={ deli:'smoke-meat-plates.webp' };
     const ambient={};
-    MENU.forEach(d=>{ const s=d.items.find(x=>x.fit!=='contain')||d.items[0]; if(s) ambient[d.key]=s.img; });
+    MENU.forEach(d=>{
+      if(AMBIENT_OVERRIDE[d.key]){ ambient[d.key]=AMBIENT_OVERRIDE[d.key]; return; }
+      const s=d.items.find(x=>x.fit!=='contain')||d.items[0];
+      if(s) ambient[d.key]=s.img;
+    });
 
     /* names run 5-34 chars — the type tier comes from length */
     const tier=n=>n.length<14?'len-s':n.length<=22?'len-m':'len-l';
@@ -2795,6 +2853,30 @@
          href:'#rewards' },
      ============================================================ */
   const PROMOS = [
+    { img:'June_Geaux_Rewards_Creative_Update_new-01.webp',
+      title:'Roxane Purified Water — $4.99 for a 24 pack. Tax not included.',
+      href:'#rewards' },
+
+    { img:'July_Gorilla_Geaux_Rewards_Creative_Update-01.webp',
+      title:'Gorilla Energy 16oz — buy 2 for $4.00. Watermelon and Ultimate. Tax not included.',
+      href:'#rewards' },
+
+    { img:'June_Geaux_Rewards_Creative_Update_new-06.webp',
+      title:'Grizzly Energy 16oz — buy 1 get one for $1. Root Beer and Cream Soda. Tax not included.',
+      href:'#rewards' },
+
+    { img:'July_Geaux_Rewards_Creative_Update-01.webp',
+      title:'Phorm Energy 16oz — buy 2 for $5.00. Grape Smash and Screamin\' Freedom. Tax not included.',
+      href:'#rewards' },
+
+    { img:'June_Geaux_Rewards_Creative_Update_new-04.webp',
+      title:'Monster Energy 16oz — buy 1 get one for $1. Ultra Black, Ultra and Zero Sugar. Tax not included.',
+      href:'#rewards' },
+
+    { img:'June_Geaux_Rewards_Creative_Update-03.webp',
+      title:'Powerade 28oz — buy 1 get one for $1. Fruit Punch. Tax not included.',
+      href:'#rewards' },
+
     { img:'June_Geaux_Rewards_Creative_Update_new-02.webp',
       title:'Buy 2 get one free on 12oz Red Bull Editions — Cranberry, Blueberry and Tropical. Tax not included.',
       href:'#rewards' },
@@ -3248,86 +3330,56 @@
      everything else — which matters here: the filename has SPACES, and
      ggAsset encodeURIComponent's each path segment, so they become %20.
      A raw src attribute with spaces in it would 404. */
-  (function ggSwap(){
-    const wrap=document.querySelector('.gg-swap');
+  /* LEFT tile: hold the rewards badge, crossfade to the video, play it once,
+     crossfade back to the badge, repeat. The badge is never removed — it's the
+     resting state. If the clip is missing, .show-vid never turns on, so the
+     badge just stays up. */
+  (function rewardSwap(){
+    const wrap=document.querySelector('.t-rewardpic .rv-swap');
     if(!wrap) return;
-    const v=wrap.querySelector('.gg-v');
-    /* display order — c, a, b, then the clip */
-    let slides=['.gg-c','.gg-a','.gg-b','.gg-v'].map(s=>wrap.querySelector(s)).filter(Boolean);
-    const HOLD=5500;              /* stills only. the clip uses its own length. */
-    let i=0, timer=null, guard=null, dead=false;
-
-    if(v&&v.dataset.img){
-      v.addEventListener('error',()=>{
-        /* No clip — drop it from the rotation and keep the stills cycling
-           rather than parking on a black rectangle for its whole slot. */
-        dead=true; slides=slides.filter(el=>el!==v);
-        ggMissing('Rewards tile video', v.currentSrc||v.src);
-      },{once:true});
-      v.src=ggAsset(v.dataset.img);
-    }
-
-    function step(n){
-      i=((n%slides.length)+slides.length)%slides.length;
-      const el=slides[i];
-      slides.forEach(s=>s.classList.toggle('on', s===el));
-      wrap.querySelector('.gg-c').classList.toggle('off', el!==wrap.querySelector('.gg-c'));
-      clearTimeout(timer); clearTimeout(guard);
-      if(el===v && !dead){
-        try{ v.currentTime=0; }catch(e){}
-        const p=v.play();
-        if(p&&p.catch) p.catch(()=>step(i+1));   /* autoplay refused -> move on */
-        /* Safety net: if `ended` never arrives — stalled network, codec the
-           browser won't decode — the tile would sit on one frame forever.
-           duration is NaN until metadata loads, hence the fallback. */
-        const wait=(isFinite(v.duration)&&v.duration>0 ? v.duration*1000 : 12000)+2000;
-        guard=setTimeout(()=>step(i+1), wait);
-      }else{
-        timer=setTimeout(()=>step(i+1), HOLD);
-      }
-    }
-    if(v) v.addEventListener('ended',()=>step(i+1));
-
-    /* Only run while home is on screen and the tab is visible. Reads the hash
-       directly — the router sets body.dataset.view and registers its listener
-       after this one, so that attribute is always one step behind here. */
-    const live=()=>!document.hidden && !/^#(shop|\/(?!home\b)[a-z])/.test(location.hash||'');
-    function sync(){
-      if(live()) step(i);
-      else { clearTimeout(timer); clearTimeout(guard); if(v) v.pause(); }
-    }
-    addEventListener('hashchange',sync);
-    document.addEventListener('visibilitychange',sync);
-    step(0);
-  })();
-
-  /* Rewards backdrop. Plays only while that view is open — it is one of eight,
-     so most of the time decoding it would be pure waste. */
-  (function rewardsVideo(){
-    const v=document.querySelector('.rw-video');
+    const v=wrap.querySelector('.rv-vid');
     if(!v||!v.dataset.img) return;
-    v.addEventListener('error',()=>ggMissing('Rewards backdrop', v.currentSrc||v.src),{once:true});
+    const BADGE_HOLD=5000;         /* how long the badge shows before the clip */
+    let timer=null, dead=false;
+
+    v.addEventListener('error',()=>{
+      dead=true; wrap.classList.remove('show-vid'); clearTimeout(timer);
+      if(window.ggMissing) ggMissing('Rewards tile video', v.currentSrc||v.src);
+    },{once:true});
     v.src=ggAsset(v.dataset.img);
-    const onRewards=()=>/^#\/rewards\b/.test(location.hash||'') && !document.hidden;
-    const sync=()=>{
-      if(onRewards()){ const p=v.play(); if(p&&p.catch) p.catch(()=>{}); }
-      else v.pause();
-    };
-    /* Reads the hash directly, not body.dataset.view — the router sets that
-       attribute and registers its hashchange listener AFTER this one, so this
-       would always see the previous view. Same trap as the hero video. */
-    addEventListener('hashchange',sync);
-    document.addEventListener('visibilitychange',sync);
-    sync();
+
+    function toVideo(){
+      if(dead||document.hidden) return holdBadge();
+      wrap.classList.add('show-vid');
+      try{ v.currentTime=0; }catch(e){}
+      const p=v.play();
+      if(p&&p.catch) p.catch(()=>{ wrap.classList.remove('show-vid'); holdBadge(); });
+    }
+    function toBadge(){ wrap.classList.remove('show-vid'); holdBadge(); }
+    function holdBadge(){ clearTimeout(timer); timer=setTimeout(toVideo, BADGE_HOLD); }
+
+    v.addEventListener('ended', toBadge);
+    document.addEventListener('visibilitychange',()=>{
+      if(document.hidden){ v.pause(); clearTimeout(timer); }
+      else if(!wrap.classList.contains('show-vid')) holdBadge();
+    });
+    holdBadge();
   })();
 
-  /* Community photos: resolve data-img -> ggAsset the same way every other
-     asset on the site does. If a file isn't uploaded yet the <img> onerror
-     drops in the "Photo coming soon" slot, so a missing photo degrades to the
-     brand gradient instead of a broken icon. */
-  (function communityImages(){
-    document.querySelectorAll('#community img[data-img]').forEach(img=>{
-      img.src=ggAsset(img.dataset.img);
+  /* RIGHT tile promo slideshow: crossfade the promo images every 5s. Pure
+     images, no video — advances on a timer, pauses when the tab is hidden. */
+  (function psSlideshow(){
+    const slides=[...document.querySelectorAll('.t-promo .ps-slide')];
+    if(slides.length<2) return;
+    const HOLD=5000; let i=0, timer=null;
+    function show(n){
+      i=((n%slides.length)+slides.length)%slides.length;
+      slides.forEach((s,k)=>s.classList.toggle('on', k===i));
+    }
+    function tick(){ clearTimeout(timer); timer=setTimeout(()=>{ show(i+1); tick(); }, HOLD); }
+    show(0); tick();
+    document.addEventListener('visibilitychange',()=>{
+      if(document.hidden) clearTimeout(timer); else tick();
     });
   })();
 
