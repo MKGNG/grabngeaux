@@ -3334,6 +3334,26 @@
      crossfade back to the badge, repeat. The badge is never removed — it's the
      resting state. If the clip is missing, .show-vid never turns on, so the
      badge just stays up. */
+  /* Geaux Plus Rewards backdrop video. Lost when the tile IIFEs were rewritten;
+     restored. Plays only on the rewards view, reads the hash directly (the
+     router's body.dataset.view lags behind on hashchange). */
+  (function rewardsVideo(){
+    const v=document.querySelector('.rw-video');
+    if(!v||!v.dataset.img) return;
+    v.addEventListener('error',()=>{ if(window.ggMissing) ggMissing('Rewards backdrop', v.currentSrc||v.src); },{once:true});
+    v.src=ggAsset(v.dataset.img);
+    const onRewards=()=>/^#\/rewards\b/.test(location.hash||'') && !document.hidden;
+    const sync=()=>{ if(onRewards()){ const p=v.play(); if(p&&p.catch) p.catch(()=>{}); } else v.pause(); };
+    addEventListener('hashchange',sync);
+    document.addEventListener('visibilitychange',sync);
+    sync();
+  })();
+
+  /* Community photos: resolve data-img -> ggAsset. Also lost in the same rewrite. */
+  (function communityImages(){
+    document.querySelectorAll('#community img[data-img]').forEach(img=>{ img.src=ggAsset(img.dataset.img); });
+  })();
+
   (function rewardSwap(){
     const wrap=document.querySelector('.t-rewardpic .rv-swap');
     if(!wrap) return;
