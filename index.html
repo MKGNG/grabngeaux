@@ -924,6 +924,9 @@
   .accent-g{color:var(--gator-lite)} .accent-gd{color:var(--gold-lite)} .accent-p{color:var(--purple-lite)}
 
   /* Departments — pull-down category tabs */
+  /* Departments banner — full width of the section, blends on its white bg. */
+  .dep-banner{margin:8px 0 34px;line-height:0}
+  .dep-banner img{display:block;width:100%;height:auto;aspect-ratio:2500/714;border-radius:14px}
   .dep-accordion{display:flex;flex-direction:column;gap:12px}
   .dep-cat{border:1px solid var(--line);border-radius:16px;overflow:hidden;background:linear-gradient(160deg,var(--panel),var(--ink-2));transition:border-color .3s}
   .dep-cat.open{border-color:var(--cat,var(--gator))}
@@ -1228,8 +1231,24 @@
      position:relative;z-index:0 (paints late) — so #menu's fixed .bg-video
      covered the footer as you scrolled to it. Pre-existing; the white .90
      scrim just hid it. z-index 3 clears #menu(0) and sits under nav(100). */
+  /* The gas-station header blended in as the footer BACKGROUND. Dark image, so
+     a scrim sits over it and the footer text flips light (dark-on-dark was
+     2.38:1 = invisible). Scoped to footer — nothing else on the site changes. */
   footer{position:relative;z-index:3;
-    border-top:1px solid var(--line);background:var(--ink-2);padding:64px 0 34px}
+    border-top:3px solid var(--gator);
+    background-color:var(--ink-2);
+    background-image:
+      linear-gradient(rgba(20,17,26,.62),rgba(20,17,26,.72)),
+      url("https://tcxctflzsvaruvfeyoim.supabase.co/storage/v1/object/public/site-images/GNG_WEBSITE_HEADER_2025_02-01.webp");
+    background-size:cover;background-position:center;
+    padding:64px 0 34px}
+  footer .foot-col a{color:#e8e4dc}
+  footer .foot-col a:hover{color:#fff}
+  footer .foot-col h5{color:#e6c455}
+  footer .foot-brand p{color:#cfc9c0}
+  footer .foot-bottom,footer .foot-bottom *{color:#bdb8b0}
+  footer .foot-bottom{border-top-color:rgba(255,255,255,.16)}
+  footer .foot-col a::after{background:var(--gator)}
   .foot-grid{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:40px}
   .foot-brand img{width:64px;margin-bottom:16px}
   .foot-brand p{color:var(--muted-2);font-size:14px;max-width:260px}
@@ -1756,7 +1775,7 @@
      That design has already gone: the Visit Us banner alone is 548px, so the
      page scrolls regardless. The stripped footer was costing home the only
      links to Apply Online and the rest, on the one page most people land on. */
-  /* WAS: body[data-view="home"] footer{padding:0} — the full footer needs its
+  /* WAS: /* padding:0 removed — home shows the full footer now */ — the full footer needs its
      normal padding back now that it has content in it. */
   /* WAS: body[data-view="home"] .foot-bottom{margin-top:0;padding:18px 32px}
      — that compaction only made sense with no .foot-grid above it. */
@@ -1790,14 +1809,12 @@
   /* ---------- HOME FOOTER: slow cycle through the promo-card tints ----------
      Gradients can't interpolate, so they're stacked and crossfaded. Green is the
      always-solid base; gold and purple fade in over it and only drop while covered. */
-  body[data-view="home"] footer{position:relative;overflow:hidden;
-    background:linear-gradient(155deg,#EAF5EC,#DDEEE1)}
+  /* home shows the image + scrim like every page now */
+  body[data-view="home"] footer{position:relative;overflow:hidden}
   body[data-view="home"] footer::before,
-  body[data-view="home"] footer::after{content:"";position:absolute;inset:0;z-index:0;pointer-events:none}
-  body[data-view="home"] footer::before{background:linear-gradient(155deg,#F7F0DD,#EFE6CF);
-    opacity:0;animation:footTintB 24s ease-in-out infinite}
-  body[data-view="home"] footer::after{background:linear-gradient(155deg,#F2E9F7,#E8DAF0);
-    opacity:0;animation:footTintC 24s ease-in-out infinite}
+  body[data-view="home"] footer::after{display:none}
+  /* footTintB removed */
+  
   body[data-view="home"] footer > *{position:relative;z-index:1}
   @keyframes footTintB{0%,33.3%{opacity:0}41.7%,75%{opacity:1}75.1%,100%{opacity:0}}
   @keyframes footTintC{0%{opacity:1}8.3%,66.7%{opacity:0}75%,100%{opacity:1}}
@@ -2065,6 +2082,14 @@
       <span class="eyebrow">Everything Under One Roof</span>
       <h2>Every aisle, <span class="accent-g">covered.</span></h2>
       <p>From the smoker to the cooler to the tackle wall — tap a category to pull down everything Grab -N- Geaux stocks.</p>
+    </div>
+    <!-- "We've got it" banner. 2500x714 = 3.5:1, full-bleed within the section.
+         The artwork is on white, which blends into the page — no radius/border. -->
+    <div class="dep-banner">
+      <img src="https://tcxctflzsvaruvfeyoim.supabase.co/storage/v1/object/public/site-images/WEVE_GOT_IT__HEADER_2025-01-01.webp"
+           alt="We've got it! GNG is the one-stop shop for snacks, spirits, soda, BBQ and much more."
+           loading="lazy"
+           onerror="if(window.ggMissing)ggMissing('Departments banner','WEVE_GOT_IT__HEADER_2025-01-01.webp')" />
     </div>
     <div class="dep-accordion reveal" id="depAcc"></div>
   </div>
